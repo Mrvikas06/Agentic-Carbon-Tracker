@@ -13,9 +13,7 @@ Coverage:
 """
 from __future__ import annotations
 
-import json
 from io import BytesIO
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -26,8 +24,6 @@ from pydantic import ValidationError
 # Import the app + helpers
 # ---------------------------------------------------------------------------
 
-import sys, os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
 from main import (
     app,

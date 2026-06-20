@@ -9,7 +9,6 @@ Architecture:
 """
 from __future__ import annotations
 
-import base64
 import json
 import logging
 import os
@@ -33,11 +32,14 @@ from models import (
     FootprintEntry,
     FootprintSummary,
     Quest,
-    QuestAcceptRequest,
     QuestAcceptResponse,
+    QuestItem,
     QuestListResponse,
+    QuestListWrapper,
     QuestStatus,
+    ReceiptAnalysis,
     ReceiptAnalysisResponse,
+    ReceiptItem,
 )
 
 # ---------------------------------------------------------------------------
@@ -72,9 +74,20 @@ app = FastAPI(
     redoc_url=None,
 )
 
+cors_origins_raw = os.getenv("CORS_ORIGINS", "")
+if cors_origins_raw:
+    origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+else:
+    origins = [
+        "http://localhost:8501",
+        "http://127.0.0.1:8501",
+        "https://carbon-frontend-586539011827.us-central1.run.app",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # tighten in production
+    allow_origins=origins,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -216,18 +229,6 @@ async def analyse_receipt(
     )
 
 
-from pydantic import BaseModel
-
-class ReceiptItem(BaseModel):
-    name: str
-    quantity: float
-    unit: str
-
-class ReceiptAnalysis(BaseModel):
-    items: list[ReceiptItem]
-    confidence: float
-    warnings: list[str]
-
 async def _call_gemini_vision(
     image_bytes: bytes,
     mime_type: str,
@@ -342,17 +343,6 @@ async def generate_quests(summary: FootprintSummary) -> QuestListResponse:
 
     return QuestListResponse(quests=quests)
 
-
-class QuestItem(BaseModel):
-    id: str
-    title: str
-    description: str
-    co2_saving_kg: float
-    difficulty: str
-    category: str
-
-class QuestListWrapper(BaseModel):
-    quests: list[QuestItem]
 
 async def _call_gemini_text_for_quests(summary: FootprintSummary) -> list[Quest]:
     """

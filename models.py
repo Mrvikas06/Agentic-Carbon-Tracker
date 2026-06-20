@@ -82,6 +82,18 @@ class ReceiptAnalysisRequest(BaseModel):
     )
 
 
+class ReceiptItem(BaseModel):
+    name: str
+    quantity: float
+    unit: str
+
+
+class ReceiptAnalysis(BaseModel):
+    items: list[ReceiptItem]
+    confidence: float
+    warnings: list[str]
+
+
 class ReceiptAnalysisResponse(BaseModel):
     """Full analysis result returned after receipt parsing."""
     summary: FootprintSummary
@@ -112,6 +124,19 @@ class Quest(BaseModel):
     difficulty: str = Field(..., pattern=r"^(easy|medium|hard)$")
     status: QuestStatus = QuestStatus.PENDING
     category: Category
+
+
+class QuestItem(BaseModel):
+    id: str
+    title: str
+    description: str
+    co2_saving_kg: float
+    difficulty: str
+    category: str
+
+
+class QuestListWrapper(BaseModel):
+    quests: list[QuestItem]
 
 
 class QuestListResponse(BaseModel):
