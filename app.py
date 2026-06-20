@@ -8,6 +8,7 @@ import os
 from typing import Optional
 
 import pandas as pd
+import plotly.graph_objects as go
 import requests
 import streamlit as st
 
