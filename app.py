@@ -11,6 +11,7 @@ from typing import Optional
 
 import pandas as pd
 import plotly.graph_objects as go
+# pyrefly: ignore [untyped-import]
 import requests
 import streamlit as st
 

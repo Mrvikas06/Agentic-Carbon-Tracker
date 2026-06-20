@@ -249,6 +249,7 @@ async def _call_gemini_vision(
     try:
         response = await client.aio.models.generate_content(
             model=VISION_MODEL,
+            # pyrefly: ignore [bad-argument-type]
             contents=[
                 types.Part.from_text(text=prompt),
                 types.Part.from_bytes(
