@@ -1,0 +1,8 @@
+# Pyrefly configuration for Agentic Carbon Tracker
+# app.py is excluded because it contains extensive inline CSS/HTML via
+# Streamlit's unsafe_allow_html markdown blocks, which Pyrefly incorrectly
+# parses as Python code.
+
+[tool.pyrefly]
+exclude = ["app.py"]
+ignore_missing_imports = true

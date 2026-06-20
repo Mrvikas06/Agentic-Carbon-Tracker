@@ -10,7 +10,6 @@ import time
 from typing import Optional
 
 import pandas as pd
-# pyrefly: ignore [missing-import]
 import plotly.graph_objects as go
 import requests
 import streamlit as st

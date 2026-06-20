@@ -16,14 +16,10 @@ import uuid
 from typing import Optional
 
 from google import genai
-# pyrefly: ignore [missing-import]
 from google.genai import types
 from dotenv import load_dotenv
-# pyrefly: ignore [missing-import]
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
-# pyrefly: ignore [missing-import]
 from fastapi.middleware.cors import CORSMiddleware
-# pyrefly: ignore [missing-import]
 from fastapi.responses import JSONResponse
 
 from models import (

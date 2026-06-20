@@ -16,9 +16,7 @@ from __future__ import annotations
 from io import BytesIO
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# pyrefly: ignore [missing-import]
 import pytest
-# pyrefly: ignore [missing-import]
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
