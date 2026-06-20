@@ -3,11 +3,14 @@ app.py — Streamlit frontend for the Agentic Carbon Tracker.
 Provides a premium, responsive, glassmorphic UI dashboard with gamification.
 """
 from __future__ import annotations
+from PIL import Image
 
 import os
+import time
 from typing import Optional
 
 import pandas as pd
+# pyrefly: ignore [missing-import]
 import plotly.graph_objects as go
 import requests
 import streamlit as st

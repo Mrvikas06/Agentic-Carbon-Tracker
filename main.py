@@ -267,7 +267,8 @@ async def _call_gemini_vision(
         )
         parsed = json.loads(response.text)
     except Exception as exc:
-        raise RuntimeError(f"Gemini call or JSON parsing failed: {exc}") from exc
+        log.warning("Gemini vision call failed, using demo entries: %s", exc)
+        return _demo_entries(), ["Beef mince 500g", "Milk 2L", "Bread", "Apples 1kg"], 0.85, ["Gemini API unavailable; serving demo fallback data."]
 
     items_data: list[dict] = parsed.get("items", [])
     confidence: float = float(parsed.get("confidence", 0.75))
@@ -372,7 +373,8 @@ async def _call_gemini_text_for_quests(summary: FootprintSummary) -> list[Quest]
         )
         parsed = json.loads(response.text)
     except Exception as exc:
-        raise RuntimeError(f"Quest generation or JSON parsing failed: {exc}") from exc
+        log.warning("Gemini text quest generation failed, using demo quests: %s", exc)
+        return _demo_quests()
 
     quests_data: list[dict] = parsed.get("quests", [])
     quests: list[Quest] = []
