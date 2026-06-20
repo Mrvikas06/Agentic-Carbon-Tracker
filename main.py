@@ -250,7 +250,7 @@ async def _call_gemini_vision(
         response = await client.aio.models.generate_content(
             model=VISION_MODEL,
             contents=[
-                prompt,
+                types.Part.from_text(text=prompt),
                 types.Part.from_bytes(
                     data=image_bytes,
                     mime_type=mime_type,
@@ -261,7 +261,8 @@ async def _call_gemini_vision(
                 response_schema=ReceiptAnalysis,
             )
         )
-        parsed = json.loads(response.text)
+        raw_text = response.text or "{}"
+        parsed = json.loads(raw_text)
     except Exception as exc:
         log.warning("Gemini vision call failed, using demo entries: %s", exc)
         return _demo_entries(), ["Beef mince 500g", "Milk 2L", "Bread", "Apples 1kg"], 0.85, ["Gemini API unavailable; serving demo fallback data."]
@@ -367,7 +368,8 @@ async def _call_gemini_text_for_quests(summary: FootprintSummary) -> list[Quest]
                 response_schema=QuestListWrapper,
             )
         )
-        parsed = json.loads(response.text)
+        raw_text = response.text or "{}"
+        parsed = json.loads(raw_text)
     except Exception as exc:
         log.warning("Gemini text quest generation failed, using demo quests: %s", exc)
         return _demo_quests()
