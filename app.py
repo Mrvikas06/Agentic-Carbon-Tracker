@@ -24,7 +24,7 @@ st.set_page_config(
     page_title="Carbon Tracker | AI-Powered Footprint Analyst",
     page_icon="🌿",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="expanded",
 )
 
 # ── PREMIUM GLASSMORPHIC DESIGN SYSTEM ────────────────────────────────────────
@@ -51,17 +51,27 @@ st.markdown("""
     font-family: 'Outfit', 'Inter', sans-serif; 
 }
 
-/* ── Hide Streamlit Header, Deploy Button and Default Elements ── */
-header, [data-testid="stHeader"], .stAppHeader, .stAppDeployButton, [data-testid="stAppDeployButton"] {
+/* ── Hide Streamlit Deploy Button and Default Elements ── */
+.stAppDeployButton, [data-testid="stAppDeployButton"] {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
+}
+header[data-testid="stHeader"] {
+    background: transparent !important;
+}
+[data-testid="stSidebarCollapsedControl"] {
+    color: var(--text-main) !important;
+    background: rgba(13, 35, 20, 0.45) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    margin-left: 10px !important;
 }
 #MainMenu, footer { 
     display: none !important; 
 }
 section[data-testid="stMain"] > div { 
-    padding-top: 2rem !important; 
+    padding-top: 1.5rem !important; 
 }
 
 /* ── Base page gradient ── */
