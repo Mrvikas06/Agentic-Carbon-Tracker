@@ -20,7 +20,6 @@ from google.genai import types
 from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 
 from models import (
     Category,
@@ -108,12 +107,6 @@ def _co2_to_trees(kg: float) -> float:
 def _co2_to_km(kg: float) -> float:
     """Convert kg CO₂ to equivalent km driven in petrol car."""
     return round(kg / KG_CO2_PER_KM_PETROL_CAR, 1)
-
-
-def _safe_error(code: str, message: str, http_status: int) -> JSONResponse:
-    """Return a sanitised error envelope — no internal details."""
-    body = ErrorResponse(code=code, message=message)
-    return JSONResponse(status_code=http_status, content=body.model_dump())
 
 
 def _validate_upload(file: UploadFile, data: bytes) -> None:
