@@ -523,6 +523,7 @@ FOOD_CO2_MAP = {
 }
 FALLBACK_FOOD_CO2 = 3.0
 
+@st.cache_data(ttl=3600)
 def quick_estimate_co2(name: str, qty: float, unit: str) -> float:
     """Frontend-side local calculation for instant form feedback."""
     name_lower = name.lower()
@@ -537,12 +538,15 @@ def quick_estimate_co2(name: str, qty: float, unit: str) -> float:
     return round(FALLBACK_FOOD_CO2 * qty_kg, 2)
 
 # ── HELPER CALCULATORS ────────────────────────────────────────────────────────
+@st.cache_data(ttl=3600)
 def co2_to_trees(kg: float) -> float:
     return round(kg / 21.0, 2)
 
+@st.cache_data(ttl=3600)
 def co2_to_km(kg: float) -> float:
     return round(kg / 0.21, 1)
 
+@st.cache_data(ttl=3600)
 def co2_to_charges(kg: float) -> int:
     return int(kg / 0.005)
 
