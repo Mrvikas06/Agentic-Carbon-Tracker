@@ -239,6 +239,16 @@ class TestAnalyseReceiptEndpoint:
         assert resp.status_code == 200
         assert resp.json()["summary"]["trees_equivalent"] > 0
 
+    @patch("main.GEMINI_API_KEY", "")
+    def test_png_upload_accepted(self):
+        resp = self._post_receipt(content_type="image/png")
+        assert resp.status_code == 200
+
+    @patch("main.GEMINI_API_KEY", "")
+    def test_webp_upload_accepted(self):
+        resp = self._post_receipt(content_type="image/webp")
+        assert resp.status_code == 200
+
     def test_invalid_file_type_rejected(self):
         resp = client.post(
             "/analyse-receipt",
@@ -346,3 +356,26 @@ def test_health_endpoint():
     resp = client.get("/health")
     assert resp.status_code == 200
     assert resp.json() == {"status": "ok"}
+
+
+def test_docs_endpoint():
+    resp = client.get("/docs")
+    assert resp.status_code == 200
+
+
+def test_openapi_schema_endpoint():
+    resp = client.get("/openapi.json")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert "info" in data
+    assert data["info"]["title"] == "Agentic Carbon Tracker API"
+
+
+def test_cors_preflight():
+    headers = {
+        "Origin": "http://localhost:8501",
+        "Access-Control-Request-Method": "POST",
+    }
+    resp = client.options("/analyse-receipt", headers=headers)
+    assert resp.status_code == 200
+    assert resp.headers.get("access-control-allow-origin") == "http://localhost:8501"
