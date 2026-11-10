@@ -1116,7 +1116,7 @@ with tab_quests:
                 elif is_accepted:
                     # User completes accepted quest
                     if st.button("Complete", key=f"comp_{qid}", use_container_width=True):
-                        st.session_state.accepted_quests.remove(qid)
+                        st.session_state.accepted_quests.discard(qid)
                         st.session_state.completed_quests.add(qid)
                         
                         # Award green points for completion
@@ -1143,6 +1143,7 @@ with tab_quests:
             if st.button("🔄 Generate New Set of Quests", use_container_width=True):
                 st.session_state.quests = []
                 st.session_state.accepted_quests = set()
+                st.session_state.completed_quests = set()
                 st.toast("Reset quests list")
                 st.rerun()
 
