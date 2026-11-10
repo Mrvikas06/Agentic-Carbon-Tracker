@@ -28,13 +28,11 @@ from models import (
     FootprintSummary,
     Quest,
     QuestAcceptResponse,
-    QuestItem,
     QuestListResponse,
     QuestListWrapper,
     QuestStatus,
     ReceiptAnalysis,
     ReceiptAnalysisResponse,
-    ReceiptItem,
 )
 
 # ---------------------------------------------------------------------------

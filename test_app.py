@@ -14,7 +14,7 @@ Coverage:
 from __future__ import annotations
 
 from io import BytesIO
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -38,7 +38,6 @@ from models import (
     Category,
     FootprintEntry,
     FootprintSummary,
-    Quest,
     QuestStatus,
 )
 
