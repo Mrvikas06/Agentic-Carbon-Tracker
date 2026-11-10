@@ -73,15 +73,6 @@ class FootprintSummary(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-class ReceiptAnalysisRequest(BaseModel):
-    """Payload sent from Streamlit to /analyse-receipt (multipart handled separately)."""
-    extra_context: Optional[str] = Field(
-        default=None,
-        max_length=500,
-        description="Optional user note, e.g. 'family of 4'"
-    )
-
-
 class ReceiptItem(BaseModel):
     name: str
     quantity: float
@@ -141,10 +132,6 @@ class QuestListWrapper(BaseModel):
 
 class QuestListResponse(BaseModel):
     quests: list[Quest]
-
-
-class QuestAcceptRequest(BaseModel):
-    quest_id: str = Field(..., min_length=1)
 
 
 class QuestAcceptResponse(BaseModel):
