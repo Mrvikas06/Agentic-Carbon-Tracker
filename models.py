@@ -74,15 +74,15 @@ class FootprintSummary(BaseModel):
 
 
 class ReceiptItem(BaseModel):
-    name: str
-    quantity: float
-    unit: str
+    name: str = Field(..., description="Item name")
+    quantity: float = Field(default=1.0, ge=0.0)
+    unit: str = Field(default="unit")
 
 
 class ReceiptAnalysis(BaseModel):
-    items: list[ReceiptItem]
-    confidence: float
-    warnings: list[str]
+    items: list[ReceiptItem] = Field(default_factory=list)
+    confidence: float = Field(default=0.85, ge=0.0, le=1.0)
+    warnings: list[str] = Field(default_factory=list)
 
 
 class ReceiptAnalysisResponse(BaseModel):
@@ -118,16 +118,16 @@ class Quest(BaseModel):
 
 
 class QuestItem(BaseModel):
-    id: str
-    title: str
-    description: str
-    co2_saving_kg: float
-    difficulty: str
-    category: str
+    id: str = Field(default="")
+    title: str = Field(default="New Quest")
+    description: str = Field(default="")
+    co2_saving_kg: float = Field(default=1.0, ge=0.0)
+    difficulty: str = Field(default="medium")
+    category: str = Field(default="food")
 
 
 class QuestListWrapper(BaseModel):
-    quests: list[QuestItem]
+    quests: list[QuestItem] = Field(default_factory=list)
 
 
 class QuestListResponse(BaseModel):
