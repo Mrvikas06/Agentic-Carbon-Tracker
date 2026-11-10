@@ -15,7 +15,7 @@ import plotly.graph_objects as go
 import requests
 import streamlit as st
 
-API_BASE: str = os.getenv("BACKEND_URL", "http://localhost:8000")
+API_BASE: str = os.getenv("BACKEND_URL", "http://localhost:8000").rstrip("/")
 
 # Set Page Config with SEO elements & descriptive title
 st.set_page_config(
