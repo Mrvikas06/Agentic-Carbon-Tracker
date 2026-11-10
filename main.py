@@ -107,6 +107,22 @@ def _co2_to_km(kg: float) -> float:
     return round(kg / KG_CO2_PER_KM_PETROL_CAR, 1)
 
 
+def _safe_float(val: object, default: float = 1.0) -> float:
+    """Safely convert a numeric value or numeric string to non-negative float."""
+    if isinstance(val, (int, float)):
+        return float(val) if val >= 0 else default
+    if isinstance(val, str):
+        import re
+        match = re.search(r"\d*\.?\d+", val)
+        if match and match.group():
+            try:
+                num = float(match.group())
+                return num if num >= 0 else default
+            except ValueError:
+                pass
+    return default
+
+
 def _validate_upload(file: UploadFile, data: bytes) -> None:
     """Raise HTTPException if file fails type/size checks."""
     if file.content_type not in ALLOWED_MIME_TYPES:
@@ -255,41 +271,52 @@ async def _call_gemini_vision(
         )
         raw_text = response.text or "{}"
         parsed = json.loads(raw_text)
+        if not isinstance(parsed, dict):
+            parsed = {}
+
+        items_data = parsed.get("items", [])
+        if not isinstance(items_data, list):
+            items_data = []
+
+        confidence = _safe_float(parsed.get("confidence"), 0.75)
+        raw_warnings = parsed.get("warnings", [])
+        warnings = [str(w) for w in raw_warnings] if isinstance(raw_warnings, list) else []
+
+        entries: list[FootprintEntry] = []
+        raw_items: list[str] = []
+
+        for item in items_data:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name", "Unknown item")).strip() or "Unknown item"
+            quantity = _safe_float(item.get("quantity"), FALLBACK_ITEM_WEIGHT_KG)
+            unit = str(item.get("unit", "unit")).strip() or "unit"
+
+            # Normalise quantity to kg for CO₂ lookup
+            qty_kg = quantity if unit in ("kg", "g") else FALLBACK_ITEM_WEIGHT_KG
+            if unit == "g":
+                qty_kg = quantity / 1000
+
+            kg_co2 = estimate_item_co2(name, qty_kg)
+            raw_items.append(f"{name} {quantity}{unit}")
+
+            entries.append(
+                FootprintEntry(
+                    item=name,
+                    category=Category.FOOD,
+                    kg_co2=kg_co2,
+                    quantity=quantity,
+                    unit=unit,
+                )
+            )
+
+        if not entries:
+            return _demo_entries(), ["Beef mince 500g", "Milk 2L", "Bread", "Apples 1kg"], 0.85, ["No valid items parsed; serving demo fallback data."]
+
+        return entries, raw_items, confidence, warnings
     except Exception as exc:
         log.warning("Gemini vision call failed, using demo entries: %s", exc)
         return _demo_entries(), ["Beef mince 500g", "Milk 2L", "Bread", "Apples 1kg"], 0.85, ["Gemini API unavailable; serving demo fallback data."]
-
-    items_data: list[dict] = parsed.get("items", [])
-    confidence: float = float(parsed.get("confidence", 0.75))
-    warnings: list[str] = parsed.get("warnings", [])
-
-    entries: list[FootprintEntry] = []
-    raw_items: list[str] = []
-
-    for item in items_data:
-        name: str = str(item.get("name", "Unknown item")).strip()
-        quantity: float = float(item.get("quantity", FALLBACK_ITEM_WEIGHT_KG))
-        unit: str = str(item.get("unit", "unit"))
-
-        # Normalise quantity to kg for CO₂ lookup
-        qty_kg = quantity if unit in ("kg", "g") else FALLBACK_ITEM_WEIGHT_KG
-        if unit == "g":
-            qty_kg = quantity / 1000
-
-        kg_co2 = estimate_item_co2(name, qty_kg)
-        raw_items.append(f"{name} {quantity}{unit}")
-
-        entries.append(
-            FootprintEntry(
-                item=name,
-                category=Category.FOOD,
-                kg_co2=kg_co2,
-                quantity=quantity,
-                unit=unit,
-            )
-        )
-
-    return entries, raw_items, confidence, warnings
 
 
 def _demo_entries() -> list[FootprintEntry]:
@@ -362,35 +389,44 @@ async def _call_gemini_text_for_quests(summary: FootprintSummary) -> list[Quest]
         )
         raw_text = response.text or "{}"
         parsed = json.loads(raw_text)
+        if not isinstance(parsed, dict):
+            parsed = {}
+
+        quests_data = parsed.get("quests", [])
+        if not isinstance(quests_data, list):
+            quests_data = []
+
+        quests: list[Quest] = []
+        for qd in quests_data:
+            if not isinstance(qd, dict):
+                continue
+            diff_raw = str(qd.get("difficulty", "medium")).lower()
+            diff = diff_raw if diff_raw in ("easy", "medium", "hard") else "medium"
+
+            cat_str = str(qd.get("category", "food")).lower()
+            try:
+                cat = Category(cat_str)
+            except ValueError:
+                cat = Category.FOOD
+
+            saving = _safe_float(qd.get("co2_saving_kg"), 1.0)
+
+            quests.append(
+                Quest(
+                    id=str(qd.get("id") or uuid.uuid4().hex[:8]),
+                    title=str(qd.get("title", "Unnamed Quest")).strip() or "Unnamed Quest",
+                    description=str(qd.get("description", "")).strip(),
+                    co2_saving_kg=saving,
+                    difficulty=diff,
+                    category=cat,
+                    status=QuestStatus.PENDING,
+                )
+            )
+
+        return quests if quests else _demo_quests()
     except Exception as exc:
         log.warning("Gemini text quest generation failed, using demo quests: %s", exc)
         return _demo_quests()
-
-    quests_data: list[dict] = parsed.get("quests", [])
-    quests: list[Quest] = []
-    for qd in quests_data:
-        diff = qd.get("difficulty", "medium").lower()
-        if diff not in ("easy", "medium", "hard"):
-            diff = "medium"
-
-        cat_str = qd.get("category", "food").lower()
-        try:
-            cat = Category(cat_str)
-        except ValueError:
-            cat = Category.FOOD
-
-        quests.append(
-            Quest(
-                id=str(qd.get("id", uuid.uuid4().hex[:8])),
-                title=str(qd.get("title", "Unnamed Quest")),
-                description=str(qd.get("description", "")),
-                co2_saving_kg=float(qd.get("co2_saving_kg", 1.0)),
-                difficulty=diff,
-                category=cat,
-                status=QuestStatus.PENDING,
-            )
-        )
-    return quests
 
 
 def _demo_quests() -> list[Quest]:
