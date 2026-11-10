@@ -802,8 +802,10 @@ with tab_dash:
                 # Vertical aligned delete button
                 st.write("")
                 if st.button("🗑️", key=f"del_{idx}", help=f"Remove '{row['item']}' from history"):
-                    st.session_state.footprint_history.pop(idx)
-                    st.toast(f"Deleted '{row['item']}' from log")
+                    idx_int = int(idx)
+                    if 0 <= idx_int < len(st.session_state.footprint_history):
+                        deleted = st.session_state.footprint_history.pop(idx_int)
+                        st.toast(f"Deleted '{deleted.get('item', 'Item')}' from log")
                     st.rerun()
 
         # Actions Row: Export & Clear
