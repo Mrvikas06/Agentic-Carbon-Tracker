@@ -5,14 +5,13 @@ AI-powered personal carbon footprint tracker — scan a receipt, get insights, a
 ## Project Structure
 
 ```
-carbon-tracker/
-├── backend/
-│   ├── main.py          # FastAPI — async endpoints, Gemini integration
-│   └── models.py        # Pydantic schemas (strict typed)
-├── frontend/
-│   └── app.py           # Streamlit dashboard
-├── tests/
-│   └── test_app.py      # pytest suite (all AI mocked)
+Agentic-Carbon-Tracker/
+├── main.py              # FastAPI — async endpoints, Gemini integration
+├── models.py            # Pydantic schemas (strict typed)
+├── app.py               # Streamlit dashboard
+├── test_app.py          # pytest suite (all AI mocked)
+├── Dockerfile.backend   # Backend container image
+├── Dockerfile.frontend  # Frontend container image
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -35,21 +34,19 @@ cp .env.example .env
 
 ### 3. Run backend
 ```bash
-cd backend
 uvicorn main:app --reload --port 8000
 # API docs → http://localhost:8000/docs
 ```
 
 ### 4. Run frontend (new terminal)
 ```bash
-cd frontend
 streamlit run app.py
 # Opens → http://localhost:8501
 ```
 
 ### 5. Run tests
 ```bash
-pytest tests/ -v
+pytest -v
 # All Gemini calls are mocked — no live API needed
 ```
 
