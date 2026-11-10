@@ -29,6 +29,7 @@ from main import (
     app,
     _co2_to_km,
     _co2_to_trees,
+    _safe_float,
     estimate_item_co2,
     _demo_entries,
     _demo_quests,
@@ -161,6 +162,38 @@ class TestFootprintEntryModel:
     def test_item_stripped(self):
         e = FootprintEntry(item="  Apples  ", category=Category.FOOD, kg_co2=1.1)
         assert e.item == "Apples"
+
+    def test_negative_quantity_raises(self):
+        with pytest.raises(ValidationError):
+            FootprintEntry(item="Milk", category=Category.FOOD, kg_co2=1.0, quantity=-0.5)
+
+
+# ---------------------------------------------------------------------------
+# Unit tests — _safe_float parser
+# ---------------------------------------------------------------------------
+
+
+class TestSafeFloat:
+    def test_numeric_float(self):
+        assert _safe_float(3.14, 1.0) == 3.14
+
+    def test_numeric_int(self):
+        assert _safe_float(42, 1.0) == 42.0
+
+    def test_string_with_unit(self):
+        assert _safe_float("500g", 1.0) == 500.0
+
+    def test_string_with_decimal_and_unit(self):
+        assert _safe_float("1.75 kg", 1.0) == 1.75
+
+    def test_negative_number_fallback(self):
+        assert _safe_float(-5.0, 1.0) == 1.0
+
+    def test_invalid_string_fallback(self):
+        assert _safe_float("abc", 2.0) == 2.0
+
+    def test_none_fallback(self):
+        assert _safe_float(None, 0.5) == 0.5
 
 
 # ---------------------------------------------------------------------------
